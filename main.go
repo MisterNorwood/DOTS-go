@@ -4,10 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"github.com/MisterNorwood/DOTS-go/pkg/utils"
 	"os"
 
+	"github.com/MisterNorwood/DOTS-go/pkg/utils"
+
 	"github.com/urfave/cli/v3"
+)
+
+type SourceMethod int
+
+const (
+	SourceFile SourceMethod = iota
+	SourceLink
+	SourceRepo
 )
 
 func main() {
@@ -48,39 +57,18 @@ func main() {
 			CACHE := utils.MakeCacheDir()
 			println("\n", CACHE)
 
-			var sourceFlags []interface{}
+			var sourceFlags []any
 			sourceFlags = append(sourceFlags, cmd.String("file"))
-			sourceFlags = append(sourceFlags, cmd.String("repoDir"))
 			sourceFlags = append(sourceFlags, cmd.StringSlice("links"))
-			selected := 0
+			sourceFlags = append(sourceFlags, cmd.String("repoDir"))
 
-			for _, flag := range sourceFlags {
-				fmt.Printf("Current selected: %d; Current flag type %T\n", selected, flag)
-				switch flagType := flag.(type) {
-				case string:
-					if flagType != "" {
-						selected++
-					}
-				case []string:
-					if flagType != nil && len(flagType) != 0 {
-						selected++
-					}
-				default:
-					e := fmt.Errorf("Invalid input type!")
-					return e
-				}
-			}
-			fmt.Printf("Current selected: %d\n", selected)
+			var method SourceMethod
 
-			if selected > 1 {
-				fmt.Println("Flags; file, links and repoDir are mutually exclusive!")
-				e := fmt.Errorf("Too many sources")
-				return e
-			} else if selected == 0 {
-				fmt.Println("No sources provided!")
-				e := fmt.Errorf("No sources")
+			e := verifySources(sourceFlags, &method)
+			if e != nil {
 				return e
 			}
+			fmt.Println("Method type: ", SourceMethod(method))
 
 			return nil
 		},
@@ -94,4 +82,42 @@ func main() {
 func splash() {
 	fmt.Print("Splash goes here later\n")
 }
-verifySources(var sourceFlags)
+
+// TODO: This is retatded, restrict it to only strings and slices.
+func verifySources[T any](sourceFlags []T, method *SourceMethod) error {
+	selected := 0
+
+	for i, flag := range sourceFlags {
+		switch flagType := any(flag).(type) {
+		case string:
+			if flagType != "" {
+				selected++
+				if i == 0 {
+					*method = SourceMethod(0)
+				} else {
+					*method = SourceMethod(2)
+				}
+			}
+		case []string:
+			if flagType != nil && len(flagType) != 0 {
+				selected++
+				*method = SourceMethod(1)
+			}
+		default:
+			e := fmt.Errorf("Invalid input type!")
+			return e
+		}
+	}
+	fmt.Printf("Current selected: %d\n", selected)
+
+	if selected > 1 {
+		fmt.Println("Flags; file, links and repoDir are mutually exclusive!")
+		e := fmt.Errorf("Too many sources")
+		return e
+	} else if selected == 0 {
+		fmt.Println("No sources provided!")
+		e := fmt.Errorf("No sources")
+		return e
+	}
+	return nil
+}
