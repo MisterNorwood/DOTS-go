@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/MisterNorwood/DOTS-go/pkg/utils"
+	"github.com/MisterNorwood/DOTS-go/pkg/utils/cache_util"
 
 	"github.com/urfave/cli/v3"
 )
@@ -54,8 +54,7 @@ func main() {
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			splash()
-			CACHE := utils.MakeCacheDir()
-			println("\n", CACHE)
+			utils.MakeCacheDir()
 
 			var sourceFlags []any
 			sourceFlags = append(sourceFlags, cmd.String("file"))
@@ -92,6 +91,7 @@ func verifySources[T any](sourceFlags []T, method *SourceMethod) error {
 		case string:
 			if flagType != "" {
 				selected++
+				//Due to how things are sorted, loop 0 (1) will always be file, and loop 2 (3) will always be repo
 				if i == 0 {
 					*method = SourceMethod(0)
 				} else {

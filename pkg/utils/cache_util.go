@@ -4,16 +4,18 @@ import (
 	"os"
 )
 
+var CACHE string
+
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
-func MakeCacheDir() string {
+func MakeCacheDir() {
 
 	dname, err := os.MkdirTemp("", "repos")
 	check(err)
-	return dname
+	CACHE = dname
 
 }
