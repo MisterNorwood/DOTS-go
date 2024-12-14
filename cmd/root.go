@@ -32,6 +32,14 @@ func Execute() {
 				Name:    "file",
 				Usage:   "Plain text file with repository links",
 				Aliases: []string{"f"},
+				Action: func(ctx context.Context, cli *cli.Command, file string) error {
+					_, err := pathExists(file)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				},
 			},
 			&cli.StringSliceFlag{
 				Name:    "links",
@@ -42,6 +50,14 @@ func Execute() {
 				Name:    "repoDir",
 				Usage:   "Directory containing repositories to scrape",
 				Aliases: []string{"r"},
+				Action: func(ctx context.Context, cli *cli.Command, dir string) error {
+					_, err := pathExists(dir)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				},
 			},
 			&cli.StringFlag{
 				Name:    "exportForm",
@@ -53,6 +69,7 @@ func Execute() {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			splash()
 			utils.MakeCacheDir()
+			fmt.Println(utils.GetCacheDir())
 
 			var sourceFlags []any
 			sourceFlags = append(sourceFlags, cmd.String("file"))
@@ -78,6 +95,18 @@ func Execute() {
 
 func splash() {
 	fmt.Print("Splash goes here later\n")
+
+}
+
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, err
+	}
+	return false, err
 
 }
 
