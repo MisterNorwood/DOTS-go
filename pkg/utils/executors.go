@@ -14,7 +14,7 @@ func RetriveRepositories(link string) string {
 	repoDir := repoSlice[len(repoSlice)-1] + ".git/"
 	if _, lookErr := os.Stat(repoDir); os.IsNotExist(lookErr) {
 		gitClone := exec.Command("git", "clone", "--filter=blob:none", "--bare", link)
-		gitClone.Dir = CACHE
+		gitClone.Dir = GetCacheDir()
 
 		if execError := gitClone.Run(); execError != nil {
 			fmt.Printf("Error on clone of %q \n %s", link, execError)
@@ -25,7 +25,7 @@ func RetriveRepositories(link string) string {
 }
 
 func RetriveLogStream(repoDir string) string {
-	fullPath := CACHE + repoDir
+	fullPath := GetCacheDir() + repoDir
 	logCmd := exec.Command("git", "log", "--pretty=\"%an;%ae;%h\"")
 	logCmd.Dir = fullPath
 	var ioStream bytes.Buffer

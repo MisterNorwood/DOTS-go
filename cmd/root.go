@@ -69,6 +69,7 @@ func Execute() {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			splash()
 			utils.MakeCacheDir()
+			fmt.Println(utils.GetCacheDir())
 
 			var sourceFlags []any
 			sourceFlags = append(sourceFlags, cmd.String("file"))
