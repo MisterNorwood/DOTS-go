@@ -84,6 +84,8 @@ func Execute() {
 			}
 			fmt.Println("Method type: ", SourceMethod(method))
 
+			processSource(cmd, method)
+
 			return nil
 		},
 	}

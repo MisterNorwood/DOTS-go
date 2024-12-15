@@ -11,10 +11,10 @@ import (
 )
 
 func RetriveRepositories(link string) string {
-
 	repoSlice := strings.Split(link, "/")
 	repoDir := repoSlice[len(repoSlice)-1] + ".git/"
-	if _, lookErr := os.Stat(repoDir); os.IsNotExist(lookErr) {
+
+	if _, lookErr := os.Stat(utils.GetCacheDir() + "/" + repoDir); os.IsNotExist(lookErr) {
 		gitClone := exec.Command("git", "clone", "--filter=blob:none", "--bare", link)
 		gitClone.Dir = utils.GetCacheDir()
 
