@@ -52,7 +52,6 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 		go func() {
 			wg.Wait()
 			close(dirChannel)
-			fmt.Println("CHANNEL CLOSED")
 		}()
 
 		for dir := range dirChannel {
