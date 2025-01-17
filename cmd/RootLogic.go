@@ -13,16 +13,17 @@ import (
 
 func processSource(cmd *cli.Command, method SourceMethod) {
 	var extractionDirs []string
+	var rawLogs []string
 	threads := cmd.Int("threads")
 
-	runWorkers := func(inputProvider func(chan string), dirCollector func(chan string)) {
-		dirChannel := make(chan string)
+	runWorkers := func(inputProvider func(chan string), dirCollector func(chan string, *[]string)) {
+		dirChannel := make(chan string, threads)
 		linkChannel := make(chan string, threads)
 		var wg sync.WaitGroup
 
 		for i := 0; i < int(threads); i++ {
 			wg.Add(1)
-			go worker(i, linkChannel, &wg, dirChannel)
+			go cloneWorker(i, linkChannel, &wg, dirChannel)
 		}
 
 		go func() {
@@ -35,20 +36,31 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 			close(dirChannel)
 		}()
 
-		dirCollector(dirChannel)
+		dirCollector(dirChannel, &rawLogs)
+
+		for _, rawLog := range rawLogs {
+			fmt.Printf("Print Raw Log: %s\n", rawLog)
+		}
 	}
 
 	// Input and directory collector functions
-	appendDirs := func(dirChannel chan string) {
-		for dir := range dirChannel {
-			extractionDirs = append(extractionDirs, dir)
+	retriveLogs := func(dirChannel chan string, rawLog *[]string) {
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+
+		for i := 0; i < int(threads); i++ {
+			wg.Add(1)
+			go extractWorker(i, dirChannel, &wg, &rawLogs, &mu)
 		}
+
+		wg.Wait()
+
 	}
 
 	switch method {
 	case 0: // Case for input file
 		runWorkers(
-			func(linkChannel chan string) { // Input provider for file
+			func(linkChannel chan string) {
 				file, err := os.Open(cmd.String("file"))
 				if err != nil {
 					panic(err)
@@ -63,7 +75,7 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 					fmt.Println("Error reading file:", err)
 				}
 			},
-			appendDirs,
+			retriveLogs,
 		)
 
 	case 1: // Case for array of links
@@ -74,7 +86,7 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 					linkChannel <- link
 				}
 			},
-			appendDirs,
+			retriveLogs,
 		)
 
 	case 2: // Case for local repo directory
@@ -92,17 +104,36 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 			}
 		}
 	}
+
 }
 
-func worker(id int, linkChannel <-chan string, wg *sync.WaitGroup, dirChannel chan<- string) {
+func cloneWorker(id int, linkChannel <-chan string, wg *sync.WaitGroup, dirChannel chan<- string) {
 	defer wg.Done()
+	fmt.Printf("Clone worker %d started\n", id)
 	for link := range linkChannel {
 		repoDir := executors.RetriveRepositories(link)
 		if repoDir != "" {
 			dirChannel <- repoDir
-			fmt.Printf("Worker %d: Repo %q clone succeded\n", id, link)
+			fmt.Printf("Clone Worker %d: Repo %q clone succeded\n", id, link)
 		} else {
-			fmt.Printf("Worker %d: Repo %q clone failed, Skipping...\n", id, link)
+			fmt.Printf("Clone Worker %d: Repo %q clone failed, Skipping...\n", id, link)
+		}
+	}
+
+}
+
+func extractWorker(id int, dirChannel <-chan string, wg *sync.WaitGroup, rawLogs *[]string, mu *sync.Mutex) {
+	defer wg.Done()
+	fmt.Printf("Extract worker %d started\n", id)
+	for repo := range dirChannel {
+		rawLog := executors.RetriveLogStream(repo)
+		if rawLog != "" {
+			mu.Lock()
+			*rawLogs = append(*rawLogs, rawLog)
+			mu.Unlock()
+			fmt.Printf("Extract Worker %d: Log for %q retrived\n", id, repo)
+		} else {
+			fmt.Printf("Extract Worker %d: Log for %q retrival failed, Skipping...\n", id, repo)
 		}
 	}
 
