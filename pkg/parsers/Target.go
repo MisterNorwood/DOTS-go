@@ -1,5 +1,7 @@
 package parsers
 
+import "fmt"
+
 // Target struct
 type Target struct {
 	Aliases map[string]struct{}
@@ -22,4 +24,21 @@ func TargetContains(set map[string]struct{}, value string) bool {
 
 func TargetAdd(set map[string]struct{}, value string) {
 	set[value] = struct{}{}
+}
+
+func TargetPrint(target Target) {
+	fmt.Print("[")
+	fmt.Print("Aliases:")
+	for alias := range target.Aliases {
+		fmt.Print(alias + ",")
+	}
+	fmt.Print("Mails:")
+	for mail := range target.Mails {
+		fmt.Print(mail + ",")
+	}
+	fmt.Print("Commits:")
+	for commit := range target.Commits {
+		fmt.Print(commit + ",")
+	}
+	fmt.Print("]")
 }

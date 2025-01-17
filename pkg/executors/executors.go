@@ -28,7 +28,7 @@ func RetriveRepositories(link string) string {
 
 func RetriveLogStream(repoDir string) string {
 	fullPath := utils.GetCacheDir() + "/" + repoDir
-	logCmd := exec.Command("git", "log", "--pretty=\"%an;%ae;%h\"")
+	logCmd := exec.Command("git", "log", "--pretty=%an;%ae;%h")
 	logCmd.Dir = fullPath
 	var ioStream bytes.Buffer
 	logCmd.Stdout = &ioStream

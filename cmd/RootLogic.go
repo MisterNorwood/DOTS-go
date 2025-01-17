@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/MisterNorwood/DOTS-go/pkg/executors"
+	"github.com/MisterNorwood/DOTS-go/pkg/parsers"
 	"github.com/urfave/cli/v3"
 )
 
@@ -38,9 +39,6 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 
 		dirCollector(dirChannel, &rawLogs)
 
-		for _, rawLog := range rawLogs {
-			fmt.Printf("Print Raw Log: %s\n", rawLog)
-		}
 	}
 
 	// Input and directory collector functions
@@ -103,6 +101,17 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 				}
 			}
 		}
+	}
+
+	var tDB []parsers.Target
+	for _, rawLog := range rawLogs {
+		parsers.ParseLog(rawLog, &tDB)
+	}
+	parsers.StripNoreply(&tDB, false)
+
+	for _, target := range tDB {
+		parsers.TargetPrint(target)
+		fmt.Print("\n")
 	}
 
 }
