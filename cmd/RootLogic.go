@@ -110,7 +110,7 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 	parsers.StripNoreply(&tDB, false)
 
 	for _, target := range tDB {
-		parsers.TargetPrint(target)
+		parsers.PrintTarget(target)
 		fmt.Print("\n")
 	}
 

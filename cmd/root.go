@@ -69,7 +69,6 @@ func Execute() {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			splash()
 			utils.MakeCacheDir()
-			fmt.Println(utils.GetCacheDir())
 
 			var sourceFlags []any
 			sourceFlags = append(sourceFlags, cmd.String("file"))
@@ -97,7 +96,6 @@ func Execute() {
 
 func splash() {
 	fmt.Print("Splash goes here later\n")
-
 }
 
 func pathExists(path string) (bool, error) {
@@ -112,7 +110,6 @@ func pathExists(path string) (bool, error) {
 
 }
 
-// TODO: This is retatded, restrict it to only strings and slices.
 func verifySources[T any](sourceFlags []T, method *SourceMethod) error {
 	selected := 0
 

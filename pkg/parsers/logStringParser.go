@@ -2,21 +2,20 @@ package parsers
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 func ParseLog(rawLog string, targetDB *[]Target) {
-	fmt.Print(rawLog)
 	lines := splitLines(rawLog)
 	sort.Strings(lines)
-	fmt.Println(lines)
-	fmt.Println(len(lines))
 
 	for i, line := range lines {
 		dataSlice := strings.Split(line, ";")
+		//TODO: Slice 0 seems to be empty every time
 		if len(dataSlice) != 3 {
-			fmt.Printf("Error: Invalid data slice %d: %s! Skipping... (%s)\n", i, dataSlice, line)
+			fmt.Printf("Error: Invalid data slice %d: %s! Skipping...\n", i, dataSlice)
 			continue
 		}
 
@@ -24,10 +23,11 @@ func ParseLog(rawLog string, targetDB *[]Target) {
 		mail := dataSlice[1]
 		commit := dataSlice[2]
 
-		// Attempt to find existing targets
 		targetWithAlias, targetWithMail := findTargets(*targetDB, alias, mail)
 
-		// Add data to appropriate targets or create a new one
+		//Important that this is done here, as loops with range are copies of the data, hence now
+		//I merely do the check first and cache a pointer to the chosen target.
+		//Totally haven't caused a memory leak here before  due to this^
 		if targetWithAlias != nil && targetWithMail != nil {
 			TargetAdd(targetWithMail.Commits, commit)
 		} else if targetWithAlias != nil && targetWithMail == nil {
@@ -62,7 +62,7 @@ func StripNoreply(targetDB *[]Target, keepStripped bool) {
 	for _, target := range *targetDB {
 		filteredMails := make(map[string]struct{})
 		for mail := range target.Mails {
-			if !strings.Contains(mail, "users.noreply.github.com") {
+			if isMail, _ := regexp.MatchString(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`, mail); isMail == true && !strings.Contains(mail, "users.noreply.github.com") {
 				filteredMails[mail] = struct{}{}
 			}
 		}
@@ -72,7 +72,6 @@ func StripNoreply(targetDB *[]Target, keepStripped bool) {
 		}
 	}
 	*targetDB = strippedTargetDB
-
 }
 
 func splitLines(s string) []string {

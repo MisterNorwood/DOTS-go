@@ -26,19 +26,24 @@ func TargetAdd(set map[string]struct{}, value string) {
 	set[value] = struct{}{}
 }
 
-func TargetPrint(target Target) {
-	fmt.Print("[")
-	fmt.Print("Aliases:")
-	for alias := range target.Aliases {
-		fmt.Print(alias + ",")
+func PrintTarget(target Target) {
+	fmt.Print("{")
+	printMapKey("Aliases", target.Aliases)
+	fmt.Print("; ")
+	printMapKey("Mails", target.Mails)
+	fmt.Print("; ")
+	printMapKey("Commits", target.Commits)
+	fmt.Print("}")
+}
+
+func printMapKey(label string, items map[string]struct{}) {
+	fmt.Print(label + ": ")
+	first := true
+	for item := range items {
+		if !first {
+			fmt.Print(", ")
+		}
+		fmt.Print(item)
+		first = false
 	}
-	fmt.Print("Mails:")
-	for mail := range target.Mails {
-		fmt.Print(mail + ",")
-	}
-	fmt.Print("Commits:")
-	for commit := range target.Commits {
-		fmt.Print(commit + ",")
-	}
-	fmt.Print("]")
 }
