@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"os"
 
@@ -82,6 +83,44 @@ func ExportJSON(targetDB []Target, filepath string) error {
 	encoder.SetIndent("", "  ") // For prettyPrint
 
 	if err := encoder.Encode(targetDB); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type TargetXML struct {
+	XMLName xml.Name `xml:"Target"`
+	Aliases []string `xml:"Aliases>Alias"`
+	Mails   []string `xml:"Mails>Mail"`
+	Commits []string `xml:"Commits>Commit"`
+}
+
+func ExportXML(targetDB []Target, filepath string) error {
+	xmlFile, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer xmlFile.Close()
+
+	writer := bufio.NewWriter(xmlFile)
+	defer writer.Flush()
+
+	var xmlTargets []TargetXML
+	for _, target := range targetDB {
+		xmlTargets = append(xmlTargets, TargetXML{
+			Aliases: target.AliasesAsSlice(),
+			Mails:   target.MailsAsSlice(),
+			Commits: target.CommitsAsSlice(),
+		})
+	}
+
+	// Create an XML encoder
+	encoder := xml.NewEncoder(writer)
+	encoder.Indent("", "  ") // Indent for readabilty
+
+	encoder.Encode(xml.Header)
+	if err := encoder.Encode(xmlTargets); err != nil {
 		return err
 	}
 
