@@ -92,3 +92,27 @@ func printMapKey(label string, items map[string]struct{}) {
 		first = false
 	}
 }
+
+func (target Target) AliasesAsSlice() []string {
+	var aliases []string
+	for alias := range target.Aliases {
+		aliases = append(aliases, alias)
+	}
+	return aliases
+}
+
+func (target Target) MailsAsSlice() []string {
+	var mails []string
+	for mail := range target.Mails {
+		mails = append(mails, mail)
+	}
+	return mails
+}
+
+func (target Target) CommitsAsSlice() []string {
+	var commits []string
+	for commit := range target.Commits {
+		commits = append(commits, commit)
+	}
+	return commits
+}

@@ -6,14 +6,7 @@ import (
 	"github.com/MisterNorwood/DOTS-go/pkg/utils"
 	"github.com/urfave/cli/v3"
 	"os"
-)
-
-type SourceMethod int
-
-const (
-	SourceFile SourceMethod = iota
-	SourceLink
-	SourceRepo
+	"strings"
 )
 
 func Execute() {
@@ -62,8 +55,14 @@ func Execute() {
 			&cli.StringFlag{
 				Name:    "exportForm",
 				Value:   "TXT",
-				Usage:   "Forms to export data to (CSV, XLS, TXT, JSON)",
+				Usage:   "Forms to export data to (CSV, XLS, TXT, JSON, XML, ALL)",
 				Aliases: []string{"e"},
+			},
+			&cli.BoolFlag{
+				Name:    "stripNoreply",
+				Value:   true,
+				Usage:   "Stripping default noreply anonymous mails",
+				Aliases: []string{"n"},
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -75,16 +74,20 @@ func Execute() {
 			sourceFlags = append(sourceFlags, cmd.StringSlice("links"))
 			sourceFlags = append(sourceFlags, cmd.String("repoDir"))
 
-			var method SourceMethod
+			var argContext ArgContext
 
-			e := verifySources(sourceFlags, &method)
-			if e != nil {
-				return e
+			eMethod := verifySources(sourceFlags, &argContext.sourceMethod)
+			if eMethod != nil {
+				return eMethod
 			}
-			fmt.Println("Method type: ", SourceMethod(method))
+			fmt.Println("Method type: ", SourceMethod(argContext.sourceMethod))
 
-			processSource(cmd, method)
+			eExportForm := verifyExports(cmd.String("exportForm"), &argContext.exportFormats)
+			if eExportForm != nil {
+				return eExportForm
+			}
 
+			processSource(cmd, argContext)
 			return nil
 		},
 	}
@@ -108,6 +111,42 @@ func pathExists(path string) (bool, error) {
 	}
 	return false, err
 
+}
+
+func verifyExports(e string, exports *[]ExportFormat) error {
+	formatMap := map[string]ExportFormat{
+		"TXT":  TXT,
+		"CSV":  CSV,
+		"XLS":  XLS,
+		"XML":  XML,
+		"JSON": JSON,
+		"ALL":  ALL,
+	}
+	var unknown []string
+	var result []ExportFormat
+
+	exportFormats := strings.Split(e, ",")
+	for _, format := range exportFormats {
+		if export, ok := formatMap[strings.ToUpper(format)]; ok {
+			if export == ALL { //Early ALL catch
+				*exports = []ExportFormat{ALL}
+				return nil
+			}
+			result = append(result, export)
+		} else {
+			unknown = append(unknown, format)
+		}
+	}
+	if len(unknown) > 0 {
+		return fmt.Errorf("Unknown formats: %v", unknown)
+	}
+
+	if len(result) == 0 {
+		result = append(result, TXT)
+	}
+
+	*exports = result
+	return nil
 }
 
 func verifySources[T any](sourceFlags []T, method *SourceMethod) error {

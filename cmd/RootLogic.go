@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func processSource(cmd *cli.Command, method SourceMethod) {
+func processSource(cmd *cli.Command, argContext ArgContext) {
 	var extractionDirs []string
 	var rawLogs []string
 	threads := cmd.Int("threads")
@@ -55,7 +55,7 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 
 	}
 
-	switch method {
+	switch argContext.sourceMethod {
 	case 0: // Case for input file
 		runWorkers(
 			func(linkChannel chan string) {
@@ -107,12 +107,17 @@ func processSource(cmd *cli.Command, method SourceMethod) {
 	for _, rawLog := range rawLogs {
 		parsers.ParseLog(rawLog, &tDB)
 	}
-	parsers.StripNoreply(&tDB, false)
+
+	if cmd.Bool("stripNoreply") {
+		parsers.StripNoreply(&tDB, false)
+	}
 
 	for _, target := range tDB {
 		target.PrintFancy()
 		fmt.Print("\n")
 	}
+
+	ExportLogic(cmd, &tDB, &argContext)
 
 }
 

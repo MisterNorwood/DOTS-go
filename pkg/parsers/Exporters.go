@@ -115,7 +115,6 @@ func ExportXML(targetDB []Target, filepath string) error {
 		})
 	}
 
-	// Create an XML encoder
 	encoder := xml.NewEncoder(writer)
 	encoder.Indent("", "  ") // Indent for readabilty
 
