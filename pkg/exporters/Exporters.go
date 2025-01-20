@@ -56,6 +56,7 @@ func Init() {
 }
 
 func ExportCSV(targetDB []Target, filepath string) error {
+	fmt.Println("Exporting to " + filepath + ".csv")
 	csvFile, err := os.Create(filepath + ".csv")
 	if err != nil {
 		return err
@@ -75,6 +76,7 @@ func ExportCSV(targetDB []Target, filepath string) error {
 }
 
 func ExportTXT(targetDB []Target, filepath string) error {
+	fmt.Println("Exporting to " + filepath + ".txt")
 	txtFile, err := os.Create(filepath + ".txt")
 	if err != nil {
 		return err
@@ -91,8 +93,9 @@ func ExportTXT(targetDB []Target, filepath string) error {
 	return nil
 }
 
-// FIXME: doesnt work
+// FIXME: broken formatting
 func ExportXLS(targetDB []Target, filepath string) error {
+	fmt.Println("Exporting to " + filepath + ".xlsx")
 	file := excelize.NewFile()
 	rows := [][]string{}
 	for _, target := range targetDB {
@@ -109,10 +112,11 @@ func ExportXLS(targetDB []Target, filepath string) error {
 			file.SetCellStr("Sheet1", cell, cellVal)
 		}
 	}
-	return file.SaveAs(filepath + ".xlxs")
+	return file.SaveAs(filepath + ".xlsx")
 }
 
 func ExportJSON(targetDB []Target, filepath string) error {
+	fmt.Println("Exporting to " + filepath + ".json")
 	jsonFile, err := os.Create(filepath + ".json")
 	if err != nil {
 		return err
@@ -143,6 +147,7 @@ type TargetXML struct {
 }
 
 func ExportXML(targetDB []Target, filepath string) error {
+	fmt.Println("Exporting to " + filepath + ".xml")
 	xmlFile, err := os.Create(filepath + ".xml")
 	if err != nil {
 		return err

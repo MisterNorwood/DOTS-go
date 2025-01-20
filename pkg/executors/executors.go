@@ -36,5 +36,5 @@ func RetriveLogStream(repoDir string) string {
 		fmt.Printf("Error on log extraction of %q \n %s", logCmd.Dir, execErr)
 		return ""
 	}
-	return ioStream.String()
+	return strings.TrimSpace(ioStream.String())
 }
