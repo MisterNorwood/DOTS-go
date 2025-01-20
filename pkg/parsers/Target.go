@@ -81,6 +81,22 @@ func (target Target) ToSlice() []string {
 	return slice
 }
 
+func (target Target) ToMapSlice() map[string][]string {
+	formatter := func(items map[string]struct{}) []string {
+		var slice []string
+		for item := range items {
+			slice = append(slice, item)
+		}
+		return slice
+	}
+	mapSlice := make(map[string][]string)
+
+	mapSlice["Aliases"] = formatter(target.Aliases)
+	mapSlice["Mails"] = formatter(target.Mails)
+	mapSlice["Commits"] = formatter(target.Commits)
+	return mapSlice
+}
+
 func printMapKey(label string, items map[string]struct{}) {
 	fmt.Print(label + ": ")
 	first := true

@@ -117,8 +117,11 @@ func ExportJSON(targetDB []Target, filepath string) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ") // For prettyPrint
 
-	if err := encoder.Encode(targetDB); err != nil {
-		return err
+	for _, target := range targetDB {
+		if err := encoder.Encode(target.ToMapSlice()); err != nil {
+			return err
+		}
+
 	}
 
 	return nil
