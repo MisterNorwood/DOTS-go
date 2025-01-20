@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	. "github.com/MisterNorwood/DOTS-go/pkg/exporters"
 	"github.com/MisterNorwood/DOTS-go/pkg/utils"
 	"github.com/urfave/cli/v3"
 	"os"

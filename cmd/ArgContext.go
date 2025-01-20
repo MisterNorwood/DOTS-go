@@ -1,7 +1,10 @@
 package cmd
 
+import (
+	"github.com/MisterNorwood/DOTS-go/pkg/exporters"
+)
+
 type SourceMethod int
-type ExportFormat int
 
 const (
 	SourceFile SourceMethod = iota
@@ -9,16 +12,7 @@ const (
 	SourceRepo
 )
 
-const (
-	TXT ExportFormat = iota
-	CSV
-	XLS
-	XML
-	JSON
-	ALL
-)
-
 type ArgContext struct {
 	sourceMethod  SourceMethod
-	exportFormats []ExportFormat
+	exportFormats []exporters.ExportFormat
 }

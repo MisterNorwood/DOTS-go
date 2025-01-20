@@ -60,7 +60,7 @@ func (target Target) ToCsv() string {
 	return line.String()
 }
 
-func (target Target) toSlice() []string {
+func (target Target) ToSlice() []string {
 	csvFormatter := func(items map[string]struct{}) string {
 		var line bytes.Buffer
 		first := true

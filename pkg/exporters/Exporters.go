@@ -1,4 +1,4 @@
-package parsers
+package exporters
 
 import (
 	"bufio"
@@ -8,12 +8,46 @@ import (
 	"fmt"
 	"os"
 
+	. "github.com/MisterNorwood/DOTS-go/pkg/parsers"
 	"github.com/xuri/excelize/v2"
 )
 
-// TODO: Buffer and multithread this
+type ExportFormat int
+
+const (
+	TXT ExportFormat = iota
+	CSV
+	XLS
+	XML
+	JSON
+	ALL
+)
+
+// Lazy init to avoid init self reference error
+var ActionMap map[ExportFormat]func([]Target, string) error
+
+func Init() {
+	ActionMap = map[ExportFormat]func([]Target, string) error{
+		TXT:  ExportTXT,
+		CSV:  ExportCSV,
+		XLS:  ExportXLS,
+		XML:  ExportXML,
+		JSON: ExportJSON,
+		ALL: func(targetDB []Target, filepath string) error {
+			for format, action := range ActionMap {
+				if format != ALL && action != nil { // Avoid infinite recursion with ALL
+					if err := action(targetDB, filepath); err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		},
+	}
+}
+
 func ExportCSV(targetDB []Target, filepath string) error {
-	csvFile, err := os.Create(filepath)
+	csvFile, err := os.Create(filepath + ".csv")
 	if err != nil {
 		return err
 	}
@@ -24,7 +58,7 @@ func ExportCSV(targetDB []Target, filepath string) error {
 
 	csvWriter := csv.NewWriter(writer)
 	for _, target := range targetDB {
-		if err := csvWriter.Write(target.toSlice()); err != nil {
+		if err := csvWriter.Write(target.ToSlice()); err != nil {
 			return err
 		}
 	}
@@ -32,7 +66,7 @@ func ExportCSV(targetDB []Target, filepath string) error {
 }
 
 func ExportTXT(targetDB []Target, filepath string) error {
-	txtFile, err := os.Create(filepath)
+	txtFile, err := os.Create(filepath + ".txt")
 	if err != nil {
 		return err
 	}
@@ -48,12 +82,12 @@ func ExportTXT(targetDB []Target, filepath string) error {
 	return nil
 }
 
-// TODO: make it fancier
+// FIXME: doesnt work
 func ExportXLS(targetDB []Target, filepath string) error {
 	file := excelize.NewFile()
 	rows := [][]string{}
 	for _, target := range targetDB {
-		rows = append(rows, target.toSlice())
+		rows = append(rows, target.ToSlice())
 	}
 
 	for rowIndex, row := range rows {
@@ -66,11 +100,12 @@ func ExportXLS(targetDB []Target, filepath string) error {
 			file.SetCellStr("Sheet1", cell, cellVal)
 		}
 	}
-	return file.SaveAs(filepath)
+	return file.SaveAs(filepath + ".xlxs")
 }
 
+// FIXME: Make data display as values, not string:structs maps
 func ExportJSON(targetDB []Target, filepath string) error {
-	jsonFile, err := os.Create(filepath)
+	jsonFile, err := os.Create(filepath + ".json")
 	if err != nil {
 		return err
 	}
@@ -97,7 +132,7 @@ type TargetXML struct {
 }
 
 func ExportXML(targetDB []Target, filepath string) error {
-	xmlFile, err := os.Create(filepath)
+	xmlFile, err := os.Create(filepath + ".xml")
 	if err != nil {
 		return err
 	}

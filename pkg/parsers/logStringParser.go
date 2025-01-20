@@ -13,7 +13,7 @@ func ParseLog(rawLog string, targetDB *[]Target) {
 
 	for i, line := range lines {
 		dataSlice := strings.Split(line, ";")
-		//TODO: Slice 0 seems to be empty every time
+		//FIXME: Slice 0 seems to be empty every time
 		if len(dataSlice) != 3 {
 			fmt.Printf("Error: Invalid data slice %d: %s! Skipping...\n", i, dataSlice)
 			continue
