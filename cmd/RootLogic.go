@@ -112,11 +112,6 @@ func processSource(cmd *cli.Command, argContext ArgContext) {
 		parsers.StripNoreply(&tDB, false)
 	}
 
-	for _, target := range tDB {
-		target.PrintFancy()
-		fmt.Print("\n")
-	}
-
 	ExportLogic(cmd, &tDB, &argContext)
 
 }

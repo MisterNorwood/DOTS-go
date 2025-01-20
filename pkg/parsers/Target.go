@@ -47,7 +47,6 @@ func (target Target) ToCsv() string {
 			if !first {
 				buffer.WriteString(",")
 			}
-			fmt.Print(item)
 			first = false
 		}
 	}
@@ -69,7 +68,6 @@ func (target Target) ToSlice() []string {
 			if !first {
 				line.WriteString(",")
 			}
-			fmt.Print(item)
 			first = false
 		}
 		return line.String()

@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"strconv"
 
 	. "github.com/MisterNorwood/DOTS-go/pkg/parsers"
 	"github.com/xuri/excelize/v2"
@@ -16,6 +17,7 @@ type ExportFormat int
 
 const (
 	TXT ExportFormat = iota
+	STDOUT
 	CSV
 	XLS
 	XML
@@ -28,6 +30,13 @@ var ActionMap map[ExportFormat]func([]Target, string) error
 
 func Init() {
 	ActionMap = map[ExportFormat]func([]Target, string) error{
+		STDOUT: func(targetDB []Target, filepath string) error {
+			for _, target := range targetDB {
+				target.PrintFancy()
+				fmt.Print("\n")
+			}
+			return nil
+		},
 		TXT:  ExportTXT,
 		CSV:  ExportCSV,
 		XLS:  ExportXLS,
@@ -96,14 +105,13 @@ func ExportXLS(targetDB []Target, filepath string) error {
 			if err != nil {
 				return err
 			}
-			cell := alphaIndex + fmt.Sprintf("%d", rowIndex+1)
+			cell := alphaIndex + strconv.Itoa(rowIndex+1)
 			file.SetCellStr("Sheet1", cell, cellVal)
 		}
 	}
 	return file.SaveAs(filepath + ".xlxs")
 }
 
-// FIXME: Make data display as values, not string:structs maps
 func ExportJSON(targetDB []Target, filepath string) error {
 	jsonFile, err := os.Create(filepath + ".json")
 	if err != nil {

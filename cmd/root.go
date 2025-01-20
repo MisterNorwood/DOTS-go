@@ -56,7 +56,7 @@ func Execute() {
 			&cli.StringFlag{
 				Name:    "exportForm",
 				Value:   "TXT",
-				Usage:   "Forms to export data to (CSV, XLS, TXT, JSON, XML, ALL)",
+				Usage:   "Forms to export data to (STDOUT, CSV, XLS, TXT, JSON, XML, ALL)",
 				Aliases: []string{"e"},
 			},
 			&cli.BoolFlag{
@@ -116,12 +116,13 @@ func pathExists(path string) (bool, error) {
 
 func verifyExports(e string, exports *[]ExportFormat) error {
 	formatMap := map[string]ExportFormat{
-		"TXT":  TXT,
-		"CSV":  CSV,
-		"XLS":  XLS,
-		"XML":  XML,
-		"JSON": JSON,
-		"ALL":  ALL,
+		"STDOUT": STDOUT,
+		"TXT":    TXT,
+		"CSV":    CSV,
+		"XLS":    XLS,
+		"XML":    XML,
+		"JSON":   JSON,
+		"ALL":    ALL,
 	}
 	var unknown []string
 	var result []ExportFormat
