@@ -45,7 +45,7 @@ func (target Target) ToCsv() string {
 		for item := range items {
 			buffer.WriteString(item)
 			if !first {
-				buffer.WriteString(",")
+				buffer.WriteString(", ")
 			}
 			first = false
 		}
@@ -60,22 +60,24 @@ func (target Target) ToCsv() string {
 }
 
 func (target Target) ToSlice() []string {
-	csvFormatter := func(items map[string]struct{}) string {
+	formatter := func(items map[string]struct{}) string {
 		var line bytes.Buffer
-		first := true
+		count := 0
+		target := len(items) - 1
 		for item := range items {
 			line.WriteString(item)
-			if !first {
-				line.WriteString(",")
+			if len(items) <= 1 || count == target {
+				break
 			}
-			first = false
+			line.WriteString(", ")
+			count++
 		}
 		return line.String()
 	}
 	var slice []string
-	slice = append(slice, csvFormatter(target.Aliases))
-	slice = append(slice, csvFormatter(target.Mails))
-	slice = append(slice, csvFormatter(target.Commits))
+	slice = append(slice, formatter(target.Aliases))
+	slice = append(slice, formatter(target.Mails))
+	slice = append(slice, formatter(target.Commits))
 	return slice
 }
 
