@@ -3,6 +3,8 @@ package parsers
 import (
 	"bytes"
 	"fmt"
+	"slices"
+	"sort"
 )
 
 // Target struct
@@ -41,20 +43,23 @@ func (target Target) PrintFancy() {
 
 func (target Target) ToCsv() string {
 	csvFormatter := func(items map[string]struct{}, buffer *bytes.Buffer) {
-		first := true
-		for item := range items {
-			buffer.WriteString(item)
-			if !first {
+		keys := make([]string, 0, len(items))
+		for key := range items {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for i, key := range keys {
+			buffer.WriteString(key)
+			if i < len(keys)-1 {
 				buffer.WriteString(", ")
 			}
-			first = false
 		}
 	}
 	var line bytes.Buffer
 	csvFormatter(target.Aliases, &line)
-	line.WriteString(";")
+	line.WriteString("; ")
 	csvFormatter(target.Mails, &line)
-	line.WriteString(";")
+	line.WriteString("; ")
 	csvFormatter(target.Commits, &line)
 	return line.String()
 }
@@ -62,15 +67,16 @@ func (target Target) ToCsv() string {
 func (target Target) ToSlice() []string {
 	formatter := func(items map[string]struct{}) string {
 		var line bytes.Buffer
-		count := 0
-		target := len(items) - 1
-		for item := range items {
-			line.WriteString(item)
-			if len(items) <= 1 || count == target {
-				break
+		keys := make([]string, 0, len(items))
+		for key := range items {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for i, key := range keys {
+			line.WriteString(key)
+			if i < len(keys)-1 {
+				line.WriteString(", ")
 			}
-			line.WriteString(", ")
-			count++
 		}
 		return line.String()
 	}
@@ -87,6 +93,7 @@ func (target Target) ToMapSlice() map[string][]string {
 		for item := range items {
 			slice = append(slice, item)
 		}
+		slices.Sort(slice)
 		return slice
 	}
 	mapSlice := make(map[string][]string)
