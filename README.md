@@ -1,16 +1,19 @@
 # DOTS-go
 
-`DOTS-go` is a high-performance OSINT tool written in Go, designed for scraping GitHub repositories to extract valuable metadata like contributor aliases, email addresses, and commit history. It supports multithreading and various export formats for easy integration into your OSINT workflow.
+`DOTS-go` is a high-performance OSINT tool written in Go, designed for scraping
+GitHub repositories to extract valuable metadata like contributor aliases, email
+addresses, and commit history. It supports multithreading and various export
+formats for easy integration into your OSINT workflow.
 
 ## Features
 
-- **🚀 Multithreaded Execution**: Leverages Go goroutines to scale scraping tasks across multiple cores.
-- **🔌 Multiple Input Methods**:
+- **Multithreaded Execution**: Leverages Go goroutines to scale scraping tasks across multiple cores.
+- **Multiple Input Methods**:
   - Scrape repositories directly from a list of URLs.
   - Process a text file containing repository links.
   - Scan a local directory for existing git repositories.
-- **📊 Versatile Export Options**: Support for STDOUT, TXT, CSV, XLS (Excel), XML, and JSON.
-- **🧹 Data Cleaning**: Automatically filters out anonymous `users.noreply.github.com` email addresses.
+- **Versatile Export Options**: Support for STDOUT, TXT, CSV, XLS (Excel), XML, and JSON.
+- **Data Cleaning**: Automatically filters out anonymous `users.noreply.github.com` email addresses.
 - **⚡ Efficient Caching**: Manages a local cache for repository cloning and processing.
 
 ## Installation
@@ -59,13 +62,6 @@ Run the tool using the compiled binary:
 ```bash
 ./dots-go -r /home/user/my-repos -e XLS
 ```
-
-## Maintenance
-
-The project has been recently updated to address various legacy issues:
-- Fixed JSON export to produce valid JSON arrays.
-- Added header rows to XLS exports for improved readability.
-- Improved log parsing to handle empty/trailing lines gracefully.
 
 ## License
 
