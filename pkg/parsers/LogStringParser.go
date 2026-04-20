@@ -12,8 +12,10 @@ func ParseLog(rawLog string, targetDB *[]Target) {
 	sort.Strings(lines)
 
 	for i, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
 		dataSlice := strings.Split(line, ";")
-		//FIXME: Slice 0 seems to be empty every time
 		if len(dataSlice) != 3 {
 			fmt.Printf("Error: Invalid data slice %d: %s! Skipping...\n", i, dataSlice)
 			continue

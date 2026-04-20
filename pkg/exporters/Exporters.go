@@ -93,11 +93,10 @@ func ExportTXT(targetDB []Target, filepath string) error {
 	return nil
 }
 
-// FIXME: broken formatting
 func ExportXLS(targetDB []Target, filepath string) error {
 	fmt.Println("Exporting to " + filepath + ".xlsx")
 	file := excelize.NewFile()
-	rows := [][]string{}
+	rows := [][]string{{"Aliases", "Mails", "Commits"}}
 	for _, target := range targetDB {
 		rows = append(rows, target.ToSlice())
 	}
@@ -129,11 +128,13 @@ func ExportJSON(targetDB []Target, filepath string) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ") // For prettyPrint
 
+	var allTargets []map[string][]string
 	for _, target := range targetDB {
-		if err := encoder.Encode(target.ToMapSlice()); err != nil {
-			return err
-		}
+		allTargets = append(allTargets, target.ToMapSlice())
+	}
 
+	if err := encoder.Encode(allTargets); err != nil {
+		return err
 	}
 
 	return nil
