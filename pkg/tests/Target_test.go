@@ -50,3 +50,25 @@ func TestTargetToCsv(t *testing.T) {
 		t.Errorf(`expected:  "%s", got result:  "%s"`, expected, result)
 	}
 }
+
+func TestStripNoreply(t *testing.T) {
+	targets := []Target{
+		{
+			Mails: map[string]struct{}{
+				"legit@example.com":             {},
+				"user@users.noreply.github.com": {},
+				"user@noreply.codeberg.org":     {},
+				"user@no-reply.gitlab.com":      {},
+			},
+		},
+	}
+
+	StripNoreply(&targets, false)
+
+	if len(targets[0].Mails) != 1 {
+		t.Errorf("Expected 1 mail, got %d: %v", len(targets[0].Mails), targets[0].Mails)
+	}
+	if _, ok := targets[0].Mails["legit@example.com"]; !ok {
+		t.Error("legit@example.com should still be present")
+	}
+}

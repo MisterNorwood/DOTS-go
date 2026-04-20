@@ -61,11 +61,19 @@ func findTargets(targetDB []Target, alias, mail string) (*Target, *Target) {
 
 func StripNoreply(targetDB *[]Target, keepStripped bool) {
 	var strippedTargetDB []Target
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+
 	for _, target := range *targetDB {
 		filteredMails := make(map[string]struct{})
 		for mail := range target.Mails {
-			if isMail, _ := regexp.MatchString(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`, mail); isMail == true && !strings.Contains(mail, "users.noreply.github.com") {
-				filteredMails[mail] = struct{}{}
+			if re.MatchString(mail) {
+				atIndex := strings.LastIndex(mail, "@")
+				if atIndex != -1 {
+					domain := mail[atIndex+1:]
+					if !strings.Contains(domain, "noreply") && !strings.Contains(domain, "no-reply") {
+						filteredMails[mail] = struct{}{}
+					}
+				}
 			}
 		}
 		target.Mails = filteredMails
